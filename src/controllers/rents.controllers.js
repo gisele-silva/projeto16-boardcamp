@@ -5,30 +5,32 @@ export async function allRents(req, res){
    
     try {
 
-     const { rows } = await db.query(`
-        SELECT 
-        rentals.*, 
-        customers.id AS "idCustomer", customers.name AS "customerName", 
-        games.id AS "idGame",  games.name AS "gameName", 
-        FROM rentals
-        JOIN customers ON rentals."customerId" = customers.id
-        JOIN games ON rentals."gameId" = games.id;`);
+        const { rows } = await db.query(`
+        SELECT r.*, c.id AS cid, c.name as cname,
+        g.id as gid, g.name as gname
+        FROM rentals as r
+        JOIN customers as c
+          ON r."customerId" = c.id
+        JOIN games as g
+          ON r."gameId" = g.id
+        `)
+    
 
         const results = rows.map(item => {
             const customer = {
-                id: item.idCustomer,
-                name: item.customerName
+                id: item.cid,
+                name: item.cname
             }
 
             const game = {
-                id: item.idGame,
-                name: item.gameName
+                id: item.gid,
+                name: item.gname
             }
 
-            delete item.idCustomer
-            delete item.customerName
-            delete item.idGame
-            delete item.gameName
+            delete item.cid
+            delete item.cname
+            delete item.gid
+            delete item.gname
 
             return {...item, customer, game}
 
