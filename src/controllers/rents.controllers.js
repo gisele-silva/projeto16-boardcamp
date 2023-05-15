@@ -36,8 +36,13 @@ export async function newRents(req, res){
 }
 
 export async function finishRents(req, res){
+    const { returnDate, delayFee, id } = res.locals.rental
+    
     try {
+        await db.query(`UPDATE rentals SET "returnDate"=$1, "delayFee"=$2 WHERE id=$3;`, 
+        [returnDate, delayFee, id])
         
+        return res.sendStatus(200)
     } catch (error) {
         return res.status(500).send(error.message)
     }
