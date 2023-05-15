@@ -13,13 +13,25 @@ export async function allRents(req, res){
         JOIN customers ON rentals."customerId" = customers.id
         JOIN games ON games.id = rentals."gameId"`);
 
-        const results = rows.map(({ idCustomer, customerName, idGame, gameName, ...rental }) => {
-            return {
-              ...rental,
-              customer: { id: idCustomer, name:  customerName },
-              game: { id: idGame, name: gameName }
+        const results = rows.map(item => {
+            const customer = {
+                id: item.idCustomer,
+                name: item.customerName
             }
-          })
+
+            const game = {
+                id: item.idGame,
+                name: item.gameName
+            }
+
+            delete item.idCustomer
+            delete item.customerName
+            delete item.idGame
+            delete item.gameName
+
+            return {...item, customer, game}
+
+        })
       
           res.send(results)
     } catch (error) {
