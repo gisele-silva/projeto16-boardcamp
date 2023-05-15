@@ -6,8 +6,8 @@ export async function allRents(req, res){
     try {
 
         const { rows } = await db.query(`
-        SELECT r.*, c.id AS cid, c.name as cname,
-        g.id as gid, g.name as gname
+        SELECT r.*, c.id AS customersId, c.name as customersName,
+        g.id as gameId, g.name as gameName
         FROM rentals as r
         JOIN customers as c
           ON r."customerId" = c.id
@@ -18,19 +18,19 @@ export async function allRents(req, res){
 
         const results = rows.map(item => {
             const customer = {
-                id: item.cid,
-                name: item.cname
+                id: item.customersId,
+                name: item.customersName
             }
 
             const game = {
-                id: item.gid,
-                name: item.gname
+                id: item.gameId,
+                name: item.gameName
             }
 
-            delete item.cid
-            delete item.cname
-            delete item.gid
-            delete item.gname
+            delete item.customersId
+            delete item.customersName
+            delete item.gameId
+            delete item.gameName
 
             return {...item, customer, game}
 
