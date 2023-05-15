@@ -6,13 +6,13 @@ export async function allRents(req, res){
     try {
 
         const { rows } = await db.query(`
-        SELECT r.*, c.id AS cid, c.name as cname,
-        g.id as gid, g.name as gname
-        FROM rentals as r
-        JOIN customers as c
-          ON r."customerId" = c.id
-        JOIN games as g
-          ON r."gameId" = g.id
+        SELECT rentals.*, customers.id AS cid, customers.name as cname,
+        games.id as gid, games.name as gname
+        FROM rentals
+        JOIN customers
+          ON rentals."customerId" = customers.id
+        JOIN games
+          ON rentals."gameId" = g.id
         `)
     
 
