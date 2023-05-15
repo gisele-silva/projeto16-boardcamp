@@ -2,26 +2,26 @@ import { db } from "../database/database.connection.js";
 import dayjs from "dayjs";
 
 export async function allRents(req, res){
-    const { customerId, gameId } = req.query
-
-    const findAllJoin = `
-        SELECT rentals.*, 
+   
+    try {
+     const { rows } = await db.query(`
+        SELECT 
+        rentals.*, 
         customers.id AS "idCustomer", customers.name AS "customerName", 
         games.id AS "idGame",  games.name AS "gameName", 
-        games."categoryId", categories.name AS "categoryName"
         FROM rentals
         JOIN customers ON rentals."customerId" = customers.id
-        JOIN games ON games.id = rentals."gameId"
-        JOIN categories ON categories.id = games."categoryId"`;
-    
-    try {
-     
-        const { rows } = customerId? await db.query(findAllJoin + 'WHERE "customerId"=$1;', [Number(customerId),])
-        : gameId? await connectionDB.query(findAllJoin + 'WHERE "gameId"=$1;', [Number(gameId),])
-        : db.query(queryGlobal);
-  
-      res.send(rows);
+        JOIN games ON games.id = rentals."gameId"`);
 
+        const results = rows.map(({ idCustomer, customerName, idGame, gameName, ...rental }) => {
+            return {
+              ...rental,
+              customer: { id: idCustomer, name:  customerName },
+              game: { id: idGame, name: gameName }
+            }
+          })
+      
+          res.send(results)
     } catch (error) {
         return res.status(500).send(error.message)
     }
@@ -61,17 +61,18 @@ export async function finishRents(req, res){
 }
 
 export async function deleteRents(req, res){
-    const { id } = req.params;
-
-  try {
-    const rents = await connectionDB.query("SELECT * FROM rentals WHERE id=$1", [id]);
-    const rental = rents.rows[0];
-    if (rents.rowCount === 0) return res.sendStatus(404);
-    if (!rental.returnDate) return res.sendStatus(400);
-
-    await db.query("DELETE FROM rentals WHERE id=$1", [id]);
-    res.sendStatus(200);
-  } catch (err) {
-    res.status(500).send(err.message);
+    const { id } = req.params
+    try {
+      const { rows, rowCount } = await db.query('SELECT * FROM rentals WHERE id=$1', [id])
+  
+      if (rowCount === 0) return res.sendStatus(404)
+      if (!rows[0].returnDate) return res.sendStatus(400)
+  
+      await db.query("DELETE FROM rentals WHERE id=$1", [id])
+  
+      res.sendStatus(200)
+    } catch (error) {
+      res.status(500).send(error.message)
+    }
+  
   }
-}
