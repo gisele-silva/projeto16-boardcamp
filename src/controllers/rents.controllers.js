@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 export async function allRents(req, res){
    
     try {
+
      const { rows } = await db.query(`
         SELECT 
         rentals.*, 
@@ -11,7 +12,7 @@ export async function allRents(req, res){
         games.id AS "idGame",  games.name AS "gameName", 
         FROM rentals
         JOIN customers ON rentals."customerId" = customers.id
-        JOIN games ON games.id = rentals."gameId"`);
+        JOIN games ON rentals."gameId" = games.id;`);
 
         const results = rows.map(item => {
             const customer = {
@@ -33,7 +34,8 @@ export async function allRents(req, res){
 
         })
       
-          res.send(results)
+        res.send(results)
+
     } catch (error) {
         return res.status(500).send(error.message)
     }
