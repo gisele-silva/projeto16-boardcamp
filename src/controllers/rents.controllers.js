@@ -8,7 +8,7 @@ export async function allRents(req, res){
         JOIN games ON rentals.gameId = games.id 
         JOIN rentals.customersId ON customers.id;`)
 
-        return res.send(rents.rows)
+        return res.send(rents)
 
     } catch (error) {
         return res.status(500).send(error.message)
@@ -50,14 +50,12 @@ export async function finishRents(req, res){
 
 export async function deleteRents(req, res){
     const { id } = req.params
-
+  
     try {
-        const { rows, rowCount } = await db.query('SELECT * FROM rentals WHERE id=$1', [id])
-
+        const { rows, rowCount } = await db.query('SELECT * FROM rentals WHERE id=$1;', [id])
         if (rowCount === 0) return res.sendStatus(404)
         if (!rows[0].returnDate) return res.sendStatus(400)
-
-        await db.query(`DELETE FROM rentals WHERE rentals.id = $1`, [$1])
+        await db.query(`DELETE FROM rentals WHERE id=$1;`, [$1])
         return res.sendStatus(200)
     } catch (error) {
         return res.status(500).send(error.message)
